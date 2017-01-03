@@ -27,7 +27,7 @@ def index():
 
 
 @app.route('/<token>', methods=['POST'])
-def launcher():
+def launcher(token):
     if request.method == "POST":
         update = telegram.Update.de_json(request.get_json(force=True), bot)
         logging.info('I am still alive.')
@@ -52,7 +52,7 @@ def ping(message):
 
 
 def pkgver(message):
-    chat_id = message.chat
+    chat_id = message.chat.id
     try:
         pkg_name = message.text.split(' ')[1]
     except IndexError:
