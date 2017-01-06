@@ -3,57 +3,39 @@
 """
 Simple telegram robot.
 """
-import telegram
-from flask import Flask, request
-import logging
+from telegram.ext import Updater, CommandHandler
 from bs4 import BeautifulSoup
 import requests
 import re
+import logging
 import config
 
 
-app = Flask(__name__)
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s-%(name)s-%(levelname)s-%(message)s')
 
-bot = telegram.Bot(token=config.TOKEN)
-bot.setWebhook('https://bot.memo.ink/' + config.TOKEN)
+
+def start(bot, update):
+    """
+    Welcome reply after start bot.
+    """
+    update.message.reply_text('Hi~')
 
 
-@app.route('/')
-def index():
-    return '{"roborobo":"!"}'
+def ping(bot, update):
+    """
+    Are you there?
+    """
+    update.message.reply_text('I am still alive.')
 
 
-@app.route('/<token>', methods=['POST'])
-def launcher(token):
-    if request.method == "POST":
-        update = telegram.Update.de_json(request.get_json(force=True), bot)
-        logging.info('I am still alive.')
-        handle_message(update.message)
-    return 'ok'
-
-
-def handle_message(message):
-    if message is None:
-        return
-    text = message.text
-    if '御坂御坂' in text:
-        ping(message)
-    logging.info(text)
-    if '/pkgver' in text:
-        pkgver(message)
-
-
-def ping(message):
-    chat_id = message.chat.id
-    bot.sendMessage(chat_id=chat_id, text='略略略')
-
-
-def pkgver(message):
-    chat_id = message.chat.id
+def pkgver(bot, update, args):
+    """
+    Query debian package versions.
+    """
+    chat_id = update.message.chat.id
     try:
-        pkg_name = message.text.split(' ')[1]
+        pkg_name = args[0]
     except IndexError:
         return
     pkg_url = 'https://tracker.debian.org/pkg/' + pkg_name
@@ -80,5 +62,12 @@ def pkgver(message):
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
-if __name__ == "__main__":
-    app.run()
+updater = Updater(config.TOKEN)
+
+updater.dispatcher.add_handler(CommandHandler('start', start))
+updater.dispatcher.add_handler(CommandHandler('ping', ping))
+updater.dispatcher.add_handler(CommandHandler('pkgver', pkgver,
+                                              pass_args=True))
+
+updater.start_webhook(listen='127.0.0.1', port=5000, url_path=config.TOKEN)
+updater.idle()
