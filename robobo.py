@@ -64,7 +64,7 @@ def pkgver(message):
         soup = BeautifulSoup(response.text, 'html.parser')
         # set package tracker link for the package
         answer = '[' + soup.body.h1.contents[0] + ']'
-        answer = answer + '(' + pkg_url + ')\n\n'
+        answer = answer + '(' + pkg_url + ')\n'
 
         ver_element = soup.find(text=re.compile('.*versions.*'))
         if ver_element is None:
