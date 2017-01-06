@@ -63,7 +63,7 @@ def pkgver(message):
     else:
         soup = BeautifulSoup(response.text, 'html.parser')
         # set package tracker link for the package
-        answer = '[' + soup.body.h1.contents[0] + ']'
+        answer = '*Package:* [' + soup.body.h1.contents[0] + ']'
         answer = answer + '(' + pkg_url + ')\n'
 
         ver_element = soup.find(text=re.compile('.*versions.*'))
@@ -74,7 +74,8 @@ def pkgver(message):
             tmp = tmp.find_next_sibling(class_='panel-body')
             vers = tmp.find_all('li')
             for i in vers:
-                answer = answer + i.b.contents[0] + ' ' + i.a.contents[0]
+                answer = answer + '*' + \
+                    i.b.contents[0] + '* ' + i.a.contents[0]
                 answer = answer + '\n'
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
