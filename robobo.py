@@ -16,7 +16,6 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s-%(name)s-%(levelname)s-%(message)s')
 
-bot_name = '@Robobooooooooo_bot'
 bot = telegram.Bot(token=config.TOKEN)
 bot.setWebhook('https://bot.memo.ink/' + config.TOKEN)
 
@@ -57,12 +56,16 @@ def pkgver(message):
         pkg_name = message.text.split(' ')[1]
     except IndexError:
         return
-    response = requests.get('https://tracker.debian.org/pkg/' + pkg_name)
+    pkg_url = 'https://tracker.debian.org/pkg/' + pkg_name
+    response = requests.get(pkg_url)
     if response.status_code == 404:
         answer = '好像木有找到这个包'
     else:
         soup = BeautifulSoup(response.text, 'html.parser')
-        answer = soup.body.h1.contents[0] + '\n'
+        # set package tracker link for the package
+        answer = '[' + soup.body.h1.contents[0] + ']'
+        answer = answer + '(' + pkg_url + ')\n\n'
+
         ver_element = soup.find(text=re.compile('.*versions.*'))
         if ver_element is None:
             answer = '这个包好像已经被吃掉了'
@@ -73,7 +76,7 @@ def pkgver(message):
             for i in vers:
                 answer = answer + i.b.contents[0] + ' ' + i.a.contents[0]
                 answer = answer + '\n'
-    bot.sendMessage(chat_id=chat_id, text=answer)
+    bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
 if __name__ == "__main__":
