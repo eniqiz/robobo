@@ -62,11 +62,26 @@ def pkgver(bot, update, args):
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
+def bug_url(bot, update, args):
+    """
+    return debian bug page url.
+    """
+    try:
+        bug_id = args[0]
+    except IndexError:
+        return
+    url_prefix = 'https://bugs.debian.org/cgi-bin/bugreport.cgi?bug='
+    bug_url = url_prefix + bug_id
+    update.message.reply_text(bug_url)
+
+
 updater = Updater(config.TOKEN)
 
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('ping', ping))
 updater.dispatcher.add_handler(CommandHandler('pkgver', pkgver,
+                                              pass_args=True))
+updater.dispatcher.add_handler(CommandHandler('bug', bug_url,
                                               pass_args=True))
 
 updater.start_webhook(listen='127.0.0.1', port=5000, url_path=config.TOKEN)
