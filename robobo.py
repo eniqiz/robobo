@@ -72,7 +72,7 @@ def bug_url(bot, update, args):
         return
     url_prefix = 'https://bugs.debian.org/cgi-bin/bugreport.cgi?bug='
     bug_url = url_prefix + bug_id
-    update.message.reply_text(bug_url)
+    update.message.reply_text(bug_url, quote=False)
 
 
 updater = Updater(config.TOKEN)
