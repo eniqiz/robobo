@@ -56,9 +56,16 @@ def pkgver(bot, update, args):
             tmp = tmp.find_next_sibling(class_='panel-body')
             vers = tmp.find_all('li')
             for i in vers:
-                answer = answer + '*' + \
-                    i.b.contents[0] + '* ' + i.a.contents[0]
-                answer = answer + '\n'
+                if len(i.a) == 1:
+                    answer = answer + '*' + \
+                        i.b.contents[0] + '* ' + i.a.contents[0]
+                    answer = answer + '\n'
+                elif len(i.a) == 3:
+                    # for data with link, like "NEW/untable" version
+                    answer = answer + '*' + \
+                        i.b.contents[0] + '* ' + \
+                        i.span.next_sibling.next_sibling.contents[1].contents[0]
+                    answer = answer + '\n'
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
