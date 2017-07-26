@@ -6,6 +6,7 @@ Simple telegram robot.
 from telegram.ext import Updater, CommandHandler
 from bs4 import BeautifulSoup
 import requests
+import html
 import re
 import logging
 import config
@@ -87,10 +88,10 @@ def bug_url(bot, update, args):
             soup = BeautifulSoup(response.text, 'html.parser')
             answer = soup.body.h1.text
             tmp = answer.split('\n')
-            tmp[0] = '*' + tmp[0][:-3] + '*'
-            tmp[1] = '[' + tmp[1] + '](' + bug_url + ')'
-            answer = tmp[0] + '\n' + tmp[1] + '\n' + tmp[2]
-        update.message.reply_text(answer, quote=False,  parse_mode='markdown')
+            tmp[0] = '<b>' + tmp[0][:-3] + '</b>'
+            tmp[1] = '<a href=\"' + bug_url + '\">' + tmp[1] + '</a>'
+            answer = tmp[0] + '\n' + tmp[1] + '\n' + html.escape(tmp[2])
+        update.message.reply_text(answer, quote=False,  parse_mode='html')
     else:
         update.message.reply_text('不要用奇怪的东西调戏我啊喂', quote=False)
 
