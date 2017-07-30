@@ -106,4 +106,5 @@ updater.dispatcher.add_handler(CommandHandler('bug', bug_url,
                                               pass_args=True))
 
 updater.start_webhook(listen='127.0.0.1', port=5000, url_path=config.TOKEN)
+updater.bot.set_webhook("https://your_domain.com/" + TOKEN)
 updater.idle()
