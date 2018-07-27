@@ -46,7 +46,7 @@ def pkgver(bot, update, args):
     else:
         soup = BeautifulSoup(response.text, 'html.parser')
         # set package tracker link for the package
-        answer = '*Package:* [' + soup.body.h1.contents[0] + ']'
+        answer = '*Package:* [' + soup.body.h1.get_text() + ']'
         answer = answer + '(' + pkg_url + ')\n'
 
         ver_element = soup.find(text=re.compile('.*versions.*'))
@@ -57,16 +57,12 @@ def pkgver(bot, update, args):
             tmp = tmp.find_next_sibling(class_='panel-body')
             vers = tmp.find_all('li')
             for i in vers:
-                if len(i.a) == 1:
-                    answer = answer + '*' + \
-                        i.b.contents[0] + '* ' + i.a.contents[0]
-                    answer = answer + '\n'
-                elif len(i.a) == 3:
-                    # for data with link, like "NEW/untable" version
-                    answer = answer + '*' + \
-                        i.b.contents[0] + '* ' + \
-                        i.span.next_sibling.next_sibling.contents[1].contents[0]
-                    answer = answer + '\n'
+                ver_num = i.a.get_text().strip()
+                if not any(char.isdigit() for char in ver_num):
+                    ver_num = i.span.next_sibling.next_sibling.get_text().strip()
+                answer = answer + '*' + \
+                    i.b.get_text() + '* ' + ver_num
+                answer = answer + '\n'
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
