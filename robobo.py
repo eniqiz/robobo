@@ -38,6 +38,8 @@ def pkgver(bot, update, args):
     try:
         pkg_name = args[0]
     except IndexError:
+        answer = '你要告诉我你要找什么噢~\n`/pkgver@ouobot 包名`'
+        bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
         return
     pkg_url = 'https://tracker.debian.org/pkg/' + pkg_name
     response = requests.get(pkg_url)
