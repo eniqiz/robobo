@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 import html
 import re
+import psycopg2
 import logging
 import config
 
@@ -30,15 +31,15 @@ def ping(bot, update):
     update.message.reply_text('I am still alive.')
 
 
-def pkgver(bot, update, args):
+def tracker(bot, update, args):
     """
-    Query debian package versions.
+    Query debian package tracker.
     """
     chat_id = update.message.chat.id
     try:
         pkg_name = args[0]
     except IndexError:
-        answer = '你要告诉我你要找什么噢~\n`/pkgver@ouobot 包名`'
+        answer = '你要告诉我你要找什么噢~\n`/tracker@ouobot 包名`'
         bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
         return
     pkg_url = 'https://tracker.debian.org/pkg/' + pkg_name
@@ -65,6 +66,30 @@ def pkgver(bot, update, args):
                 answer = answer + '*' + \
                     i.b.get_text() + '* ' + ver_num
                 answer = answer + '\n'
+    bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
+
+def pkg(bot, update, args):
+    """
+    Query debian package versions from udd mirror
+    """
+    chat_id = update.message.chat.id
+    try:
+        pkg_name = args[0]
+    except IndexError:
+        answer = '你要告诉我你要找什么噢~\n`/pkg@ouobot 包名`'
+        bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
+        return
+    conn = psycopg2.connect("dbname=udd user=udd-mirror password=udd-mirror host=udd-mirror.debian.net port=5432")
+    cur = conn.cursor()
+    cur.execute("SELECT version, release FROM packages_summary WHERE package = '" + pkg_name +"'")
+    records = cur.fetchall()
+    conn.close()
+    if len(records) == 0:
+        answer = '没有找到你想要的哦'
+    else:
+        answer = '*Package:* ' + pkg_name + '\n-------------------------------\n'
+        for i in records:
+            answer = answer + '*' + i[1] +':* ' + i[0] +'\n'
     bot.sendMessage(chat_id=chat_id, text=answer, parse_mode='markdown')
 
 
@@ -98,9 +123,11 @@ updater = Updater(config.TOKEN)
 
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CommandHandler('ping', ping))
-updater.dispatcher.add_handler(CommandHandler('pkgver', pkgver,
+updater.dispatcher.add_handler(CommandHandler('tracker', tracker,
                                               pass_args=True))
 updater.dispatcher.add_handler(CommandHandler('bug', bug_url,
+                                              pass_args=True))
+updater.dispatcher.add_handler(CommandHandler('pkg', pkg,
                                               pass_args=True))
 
 updater.start_webhook(listen='127.0.0.1', port=5000, url_path=config.TOKEN)
