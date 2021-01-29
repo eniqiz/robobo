@@ -81,7 +81,7 @@ def pkg(bot, update, args):
         return
     conn = psycopg2.connect("dbname=udd user=udd-mirror password=udd-mirror host=udd-mirror.debian.net port=5432")
     cur = conn.cursor()
-    cur.execute("SELECT version, release FROM packages_summary WHERE package = '" + pkg_name +"'")
+    cur.execute("SELECT version, release FROM packages_summary WHERE package = %s", (pkg_name,))
     records = cur.fetchall()
     conn.close()
     if len(records) == 0:
